@@ -1,0 +1,13 @@
+GET https://phonebook-backend-5u5x.onrender.com/info/api/persons
+
+###
+POST https://phonebook-backend-5u5x.onrender.com/info/api/persons
+content-type: application/json
+
+{
+  "name": "Deployed Person",
+  "number": "555-0000"
+}
+
+###
+DELETE https://phonebook-backend-5u5x.onrender.com/info/api/persons/1
