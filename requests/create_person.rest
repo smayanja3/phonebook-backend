@@ -1,0 +1,34 @@
+POST http://localhost:3001/api/persons
+content-type: application/json
+
+{
+  "name": "Test Person",
+  "number": "123-456"
+}
+
+
+### 1. Valid person (should work)
+POST http://localhost:3001/api/persons
+content-type: application/json
+
+{
+  "name": "Grace Hopper",
+  "number": "555-0101"
+}
+
+### 2. Missing number (should be 400)
+POST http://localhost:3001/api/persons
+content-type: application/json
+
+{
+  "name": "No Number Person"
+}
+
+### 3. Duplicate name (should be 400)
+POST http://localhost:3001/api/persons
+content-type: application/json
+
+{
+  "name": "Arto Hellas",
+  "number": "555-9999"
+}
