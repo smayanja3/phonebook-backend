@@ -144,6 +144,35 @@ app.put('/api/persons/:id', (req, res, next) => {
         .catch(error => next(error))
 })
 
+//page route = used by the update in the form
+// its apost becasue form can only GET or POST
+// does the same job as the put (/api/persons/:id)
+app.post('/update/:id', (req, res, next) => {
+    const { number } = req.body
+
+    if(!number) {
+        return Person.find({})
+        .then(persons => {
+            res.status(400).render('index', {persons, error: 'number missing'})
+        })
+        .catch(error => next(error))
+    }
+
+    Person.findById(req.params.id)
+        .then(person => {
+            // person was deleted -> go back to the list
+            if(!person){
+                return res.redirect('/')
+            }
+            person.number = number
+
+            return person.save().then(() => {
+                res.redirect('/')
+            })
+        })
+        .catch(error => next(error))
+})
+
 
 //------------------- DELETE ---------------------//
 
