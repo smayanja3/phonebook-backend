@@ -159,7 +159,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 app.post('/update/:id', (req, res, next) => {
   const { number } = req.body
 
-  if(!number) {
+  if (!number) {
     return Person.find({})
       .then(persons => {
         res.status(400).render('index', { persons, error: 'number missing' })
@@ -170,7 +170,7 @@ app.post('/update/:id', (req, res, next) => {
   Person.findById(req.params.id)
     .then(person => {
       // person was deleted -> go back to the list
-      if(!person){
+      if (!person) {
         return res.redirect('/')
       }
       person.number = number
@@ -300,14 +300,14 @@ app.post('/delete/:id', (req, res, next) => {
 
 // })
 
+//must be under all routes  but above the app.listen
 const errorHandler = (error, req, res, next) => {
   console.log(error.message)
 
   if (error.name === 'CastError') {
-    return res.status(400).send({ error: 'malformatted id' }
-    )
+    return res.status(400).send({ error: 'malformatted id' })
   }
-  if(error.name === 'ValidationError'){
+  if (error.name === 'ValidationError') {
     return res.status(400).json({ error: error.message })
   }
   next(error)
