@@ -26,3 +26,31 @@ content-type: application/json
 
 ### Delete (paste a real id from the live GET all)
 DELETE {{baseUrl}}/api/persons/PASTE-A-REAL-24-CHAR-ID
+
+
+### Name too short: expect 400 with a validation message
+POST {{baseUrl}}/api/persons
+content-type: application/json
+
+{
+  "name": "ab",
+  "number": "09-1234556"
+}
+
+### Bad number format: expect 400 "... is not a valid phone number"
+POST {{baseUrl}}/api/persons
+content-type: application/json
+
+{
+  "name": "Valid Name",
+  "number": "1234556"
+}
+
+### Valid person: expect 200
+POST {{baseUrl}}/api/persons
+content-type: application/json
+
+{
+  "name": "Good Person",
+  "number": "040-22334455"
+}
