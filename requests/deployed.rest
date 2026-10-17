@@ -5,7 +5,7 @@ POST https://phonebook-backend-5u5x.onrender.com/api/persons
 content-type: application/json
 
 {
-  "name": "Deployed Person",
+  "name": "Practice Swabi",
   "number": "555-0000"
 }
 
