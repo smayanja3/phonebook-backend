@@ -1,22 +1,16 @@
-GET https://phonebook-backend-5u5x.onrender.com/api/persons
+@baseUrl = https://phonebook-backend-5u5x.onrender.com
 
-###
-POST https://phonebook-backend-5u5x.onrender.com/api/persons
+### All people (should match your local database)
+GET {{baseUrl}}/api/persons
+
+### Info page
+GET {{baseUrl}}/info
+
+### Add a person
+POST {{baseUrl}}/api/persons
 content-type: application/json
 
 {
-  "name": "Practice Swabi",
+  "name": "Live Person",
   "number": "555-0000"
 }
-
-###
-POST https://phonebook-backend-5u5x.onrender.com/api/persons
-content-type: application/json
-
-{
-  "name": "Grace Hopper",
-  "number": "555-0066"
-}
-
-###
-DELETE https://phonebook-backend-5u5x.onrender.com/api/persons/1

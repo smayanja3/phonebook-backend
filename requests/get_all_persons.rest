@@ -1,10 +1,13 @@
-GET http://localhost:3001/api/persons
+GET https://phonebook-backend-5u5x.onrender.com/api/persons
    
 ###
+POST https://phonebook-backend-5u5x.onrender.com/api/persons
+content-type: application/json
 
-GET https://phonebook-backend-5u5x.onrender.com/api/persons
-
+{
+  "name": "Live Person",
+  "number": "555-0000"
+}
 
 ###
-
 GET https://phonebook-backend-5u5x.onrender.com/info
