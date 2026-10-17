@@ -29,6 +29,11 @@ app.use(express.json()) //<- must come before routes so it sits at the top of th
 app.use(express.urlencoded({ extended: true }))
 //vv render sits behind a proxy, so trust it for secure cookies
 app.set('trust proxy', 1)
+
+// TEMPORARY: prints variable NAMES only, never values
+console.log('SESSION vars on this server:', Object.keys(process.env).filter(k => k.toUpperCase().includes('SESSION')))
+console.log('SESSION_SECRET set?', Boolean(process.env.SESSION_SECRET))
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false, // only daves a session when something is stored in it... so visitor who do not long in can not create db entries == saveUninitialized
