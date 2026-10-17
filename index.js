@@ -146,6 +146,8 @@ app.put('/api/persons/:id', (req, res, next) => {
 
 
 //------------------- DELETE ---------------------//
+
+//API route = used to delete by REST client
 //removes a person from the db by id
 //findByIdAndDelete find matching doc and deletes it
 //next(error) hands any error to express' error handling (have not built yet)
@@ -157,9 +159,12 @@ app.delete('/api/persons/:id', (req, res, next) => {
         .catch(error => next(error))
 })
 
+
+//Page route = used by the delete button on the page
+// its a POST because HTML forms can only send GET or POST
 // recieves the delete button's form
 //removes the person and redirects back to the page(could be any page i route)
-app.delete('/delete/:id', (req, res, next) => {
+app.post('/delete/:id', (req, res, next) => {
     Person.findByIdAndDelete(req.params.id)
         .then(() => {
             res.redirect('/')
