@@ -97,6 +97,7 @@ app.post('/api/persons', (req, res, next) => {
 })
 
 
+
 app.post('/add', (req, res, next) => {
   const { name, number } = req.body
 
@@ -114,7 +115,12 @@ app.post('/add', (req, res, next) => {
     .then(() => {
       res.redirect('/') // after a successful save -> go back to ('/')
     })
-    .catch(error => (error))
+    .catch(error => {
+      if (error.name === 'ValidationError') {
+        return res.status(400).send('Invalid name or number. <a href="/">Go back</a>')
+      }
+      next(error)
+    })
 })
 
 

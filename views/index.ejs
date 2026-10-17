@@ -35,7 +35,7 @@
             <%= person.name %>
               <%= person.number %>
 
-                <form action="/update/<%= person.id %>" method="POST" class="inline">
+                <form action="/update/<% person.id %>" method="POST" class="inline">
                   <input type="text" name="number" placeholder="new number" required>
                   <button type="submit">Update</button>
                 </form>
