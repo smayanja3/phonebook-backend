@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3001 // use the port the host gives me if non u
 
 //The function receives the request, and whatever it returns is what morgan prints for :body.
 morgan.token('body', (request) => {
-    return 'BODY>> ' + JSON.stringify(request.body)
+  return 'BODY>> ' + JSON.stringify(request.body)
 })
 
 app.use(cors())
@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 //renders .ejs files
 app.set('view engine', 'ejs')
-//serves CSS and browser JS 
+//serves CSS and browser JS
 app.use(express.static('public'))
 
 
@@ -30,88 +30,88 @@ app.use(express.static('public'))
 //------------------- GET---------------------//
 // renders index.ejs and passes it the people from db
 app.get('/', (req, res, next) => {
-    Person.find({})
-        .then(persons => {
-            res.render('index', { persons, error: null })
-        })
-        .catch(error => next(error))
+  Person.find({})
+    .then(persons => {
+      res.render('index', { persons, error: null })
+    })
+    .catch(error => next(error))
 })
 
 
 // fetch catches every person from the db/ find({}) = no conditions, give me everything
 app.get('/api/persons', (req, res) => {
-    Person.find({}).then(persons => {
-        res.json(persons)
-    })
+  Person.find({}).then(persons => {
+    res.json(persons)
+  })
 })
 
 // finds one person by id/ findById returns null if = no id
 // a malformed if throws CastError
 app.get('/api/persons/:id', (req, res, next) => {
-    Person.findById(req.params.id)
-        .then(person => {
-            if (person) {
-                res.json(person)
-            } else {
-                res.status(404).end()
-            }
-        })
-        .catch(error => next(error))
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 //counts the people in the db instead of the old array
 //countDocuments({}) = how many match 'no conditions"
 app.get('/info', (req, res, next) => {
-    Person.countDocuments({})
-        .then(count => {
-            res.send(`
+  Person.countDocuments({})
+    .then(count => {
+      res.send(`
                 <p>Phonebook has info for ${count} people</p>
                 <p>${new Date()}</p>
                 `)
-        })
-        .catch(error => next(error))
+    })
+    .catch(error => next(error))
 })
 
 
 //------------------- POST ---------------------//
 //saves a new person to the db MongoDB creates id itself
-// .then only goes out after the saved succeeded 
+// .then only goes out after the saved succeeded
 app.post('/api/persons', (req, res) => {
-    const body = req.body
+  const body = req.body
 
-    if (!body.name || !body.number) {
-        return res.status(400).json({ error: 'name or number missing' })
-    }
+  if (!body.name || !body.number) {
+    return res.status(400).json({ error: 'name or number missing' })
+  }
 
-    const person = new Person({
-        name: body.name,
-        number: body.number,
-    })
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
 
-    person.save().then(savedPerson => {
-        res.json(savedPerson)
-    })
+  person.save().then(savedPerson => {
+    res.json(savedPerson)
+  })
 })
 
 
 app.post('/add', (req, res, next) => {
-    const { name, number } = req.body
+  const { name, number } = req.body
 
-    if (!name || !number) {
-        return Person.find({})
-            .then(persons => {
-                res.status(400).render('index', { persons, error: 'name or number missing' })
-            })
-            .catch(error => next(error))
-    }
+  if (!name || !number) {
+    return Person.find({})
+      .then(persons => {
+        res.status(400).render('index', { persons, error: 'name or number missing' })
+      })
+      .catch(error => next(error))
+  }
 
-    const person = new Person({ name, number })
+  const person = new Person({ name, number })
 
-    person.save()
-        .then(() => {
-            res.redirect('/') // after a successful save -> go back to ('/')
-        })
-        .catch(error => (error))
+  person.save()
+    .then(() => {
+      res.redirect('/') // after a successful save -> go back to ('/')
+    })
+    .catch(error => (error))
 })
 
 
@@ -120,57 +120,57 @@ app.post('/add', (req, res, next) => {
 // change their fields
 //save and send back the result
 app.put('/api/persons/:id', (req, res, next) => {
-    //pulls the two fields out of the req.body in one line. It’s the same as writing req.body.name and req.body.number
-    const { name, number } = req.body
+  //pulls the two fields out of the req.body in one line. It’s the same as writing req.body.name and req.body.number
+  const { name, number } = req.body
 
-    //vv loads the existing person from the db
-    Person.findById(req.params.id)
-        .then(person => {
-            // no person w this id respond 404 and STOP
-            if (!person) {
-                return res.status(404).end()
-            }
-            //changing the loaded document in memory
-            person.name = name
-            person.number = number
+  //vv loads the existing person from the db
+  Person.findById(req.params.id)
+    .then(person => {
+      // no person w this id respond 404 and STOP
+      if (!person) {
+        return res.status(404).end()
+      }
+      //changing the loaded document in memory
+      person.name = name
+      person.number = number
 
-            //a promise inside a promise. It’s slightly awkward
-            //but it keeps the save from running when the person wasn’t found
-            return person.save().then(updatedPerson => {
-                res.json(updatedPerson)
-            })
-        })
+      //a promise inside a promise. It’s slightly awkward
+      //but it keeps the save from running when the person wasn’t found
+      return person.save().then(updatedPerson => {
+        res.json(updatedPerson)
+      })
+    })
 
-        .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 //page route = used by the update in the form
 // its apost becasue form can only GET or POST
 // does the same job as the put (/api/persons/:id)
 app.post('/update/:id', (req, res, next) => {
-    const { number } = req.body
+  const { number } = req.body
 
-    if(!number) {
-        return Person.find({})
-        .then(persons => {
-            res.status(400).render('index', {persons, error: 'number missing'})
-        })
-        .catch(error => next(error))
-    }
+  if(!number) {
+    return Person.find({})
+      .then(persons => {
+        res.status(400).render('index', { persons, error: 'number missing' })
+      })
+      .catch(error => next(error))
+  }
 
-    Person.findById(req.params.id)
-        .then(person => {
-            // person was deleted -> go back to the list
-            if(!person){
-                return res.redirect('/')
-            }
-            person.number = number
+  Person.findById(req.params.id)
+    .then(person => {
+      // person was deleted -> go back to the list
+      if(!person){
+        return res.redirect('/')
+      }
+      person.number = number
 
-            return person.save().then(() => {
-                res.redirect('/')
-            })
-        })
-        .catch(error => next(error))
+      return person.save().then(() => {
+        res.redirect('/')
+      })
+    })
+    .catch(error => next(error))
 })
 
 
@@ -181,11 +181,11 @@ app.post('/update/:id', (req, res, next) => {
 //findByIdAndDelete find matching doc and deletes it
 //next(error) hands any error to express' error handling (have not built yet)
 app.delete('/api/persons/:id', (req, res, next) => {
-    Person.findByIdAndDelete(req.params.id)
-        .then(result => {
-            res.status(204).end()
-        })
-        .catch(error => next(error))
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => {
+      res.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 
@@ -194,19 +194,19 @@ app.delete('/api/persons/:id', (req, res, next) => {
 // recieves the delete button's form
 //removes the person and redirects back to the page(could be any page i route)
 app.post('/delete/:id', (req, res, next) => {
-    Person.findByIdAndDelete(req.params.id)
-        .then(() => {
-            res.redirect('/')
-        })
-        .catch(error => next(error))
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => {
+      res.redirect('/')
+    })
+    .catch(error => next(error))
 })
 
 
 
 /////////// OLD (Part 3a): in-memory version /////////////
 
-// array is comment out because the db will replace it 
-// use let instead of const so we can add or delete persons 
+// array is comment out because the db will replace it
+// use let instead of const so we can add or delete persons
 // let persons = [
 //     {
 //         "id": "1",
@@ -292,23 +292,23 @@ app.post('/delete/:id', (req, res, next) => {
 // })
 
 const errorHandler = (error, req, res, next) => {
-    console.log(error.message)
+  console.log(error.message)
 
-    if (error.name === 'CastError') {
-        return res.status(400).send({ error: 'malformatted id' }
-        )
-    }
-    next(error)
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' }
+    )
+  }
+  next(error)
 }
 
 app.use(errorHandler)
 
 app.listen(PORT, () => {
-    console.log(`Serving is buring oil ${PORT}`)
+  console.log(`Serving is buring oil ${PORT}`)
 })
 
 
-/* 
+/*
 <!-- <% %>runs JS and prints nothing (loops, if statements) -->
 <!-- <%=  %>	prints a value into the page, escaped so it’s safe from injected HTML -->
  <!-- the forEach repeats the <li> once for ever person and the <%= inserts the name -->
