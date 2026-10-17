@@ -39,10 +39,11 @@ app.get('/', (req, res, next) => {
 
 
 // fetch catches every person from the db/ find({}) = no conditions, give me everything
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
   Person.find({}).then(persons => {
     res.json(persons)
   })
+    .catch(error => next(error))
 })
 
 // finds one person by id/ findById returns null if = no id
@@ -76,7 +77,7 @@ app.get('/info', (req, res, next) => {
 //------------------- POST ---------------------//
 //saves a new person to the db MongoDB creates id itself
 // .then only goes out after the saved succeeded
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
   const body = req.body
 
   if (!body.name || !body.number) {
@@ -88,9 +89,11 @@ app.post('/api/persons', (req, res) => {
     number: body.number,
   })
 
-  person.save().then(savedPerson => {
-    res.json(savedPerson)
-  })
+  person.save()
+    .then(savedPerson => {
+      res.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
 
 
@@ -298,10 +301,14 @@ const errorHandler = (error, req, res, next) => {
     return res.status(400).send({ error: 'malformatted id' }
     )
   }
+  if(error.name === 'ValidationError'){
+    return res.status(400).json({ error: error.message })
+  }
   next(error)
 }
 
 app.use(errorHandler)
+
 
 app.listen(PORT, () => {
   console.log(`Serving is buring oil ${PORT}`)
