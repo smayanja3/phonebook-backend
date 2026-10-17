@@ -29,6 +29,12 @@ const personSchema = new mongoose.Schema({
       validator: (v) => /^\d{3}-\d{3}-\d{4}$/.test(v),
       message: (props) => `${props.value} is not a valid phone number (use 617-555-0123)`,
     }
+  },
+  // ownership you can only make and edit your own entries
+  //It stores the id of the user who created the entry. ref: 'User' records which model that id belongs to. The toJSON block and the rest of the file stay as they are.
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
   }
 })
 

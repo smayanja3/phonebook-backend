@@ -46,8 +46,23 @@ app.use(session({
 //makes currentUser available in every EJS page
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.username || null
+  res.locals.currentUserId = req.session.userId || null
   next()
 })
+
+const requireLogin = (req, res, next) => {
+  if (req.session.userId) {
+    return next()
+  }
+  res.redirect('/login')
+}
+
+const requireLoginApi = (req, res, next) => {
+  if (req.session.userId) {
+    return next()
+  }
+  res.status(401).json({ error: 'login required' })
+}
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 //renders .ejs files
@@ -138,7 +153,7 @@ app.post('/login', (req, res, next) => {
 // logot is a POST so a random link or img cant log you out
 app.post('/logout', (req, res, next) => {
   req.session.destroy(error => {
-    if(error){
+    if (error) {
       return next(error)
     }
     res.clearCookie('connect.sid')
@@ -199,7 +214,7 @@ app.get('/info', (req, res, next) => {
 //------------------- POST ---------------------//
 //saves a new person to the db MongoDB creates id itself
 // .then only goes out after the saved succeeded
-app.post('/api/persons', (req, res, next) => {
+app.post('/api/persons', requireLoginApi, (req, res, next) => {
   const body = req.body
 
   if (!body.name || !body.number) {
@@ -209,6 +224,7 @@ app.post('/api/persons', (req, res, next) => {
   const person = new Person({
     name: body.name,
     number: body.number,
+    owner: req.session.userId, // owner always comes from the session not the req.body
   })
 
   person.save()
@@ -220,7 +236,7 @@ app.post('/api/persons', (req, res, next) => {
 
 
 
-app.post('/add', (req, res, next) => {
+app.post('/add', requireLogin, (req, res, next) => {
   const { name, number } = req.body
 
   if (!name || !number) {
@@ -231,7 +247,7 @@ app.post('/add', (req, res, next) => {
       .catch(error => next(error))
   }
 
-  const person = new Person({ name, number })
+  const person = new Person({ name, number, owner: req.session.userId })
 
   person.save()
     .then(() => {
@@ -250,12 +266,12 @@ app.post('/add', (req, res, next) => {
 //find the person by id
 // change their fields
 //save and send back the result
-app.put('/api/persons/:id', (req, res, next) => {
+app.put('/api/persons/:id', requireLoginApi, (req, res, next) => {
   //pulls the two fields out of the req.body in one line. It’s the same as writing req.body.name and req.body.number
   const { name, number } = req.body
 
   //vv loads the existing person from the db
-  Person.findById(req.params.id)
+  Person.findOne({ _id: req.params.id, owner: req.session.userId })
     .then(person => {
       // no person w this id respond 404 and STOP
       if (!person) {
@@ -278,7 +294,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 //page route = used by the update in the form
 // its apost becasue form can only GET or POST
 // does the same job as the put (/api/persons/:id)
-app.post('/update/:id', (req, res, next) => {
+app.post('/update/:id', requireLogin, (req, res, next) => {
   const { number } = req.body
 
   if (!number) {
@@ -289,7 +305,7 @@ app.post('/update/:id', (req, res, next) => {
       .catch(error => next(error))
   }
 
-  Person.findById(req.params.id)
+  Person.findOne({ _id: req.params.id, owner: req.session.userId })
     .then(person => {
       // person was deleted -> go back to the list
       if (!person) {
@@ -311,8 +327,8 @@ app.post('/update/:id', (req, res, next) => {
 //removes a person from the db by id
 //findByIdAndDelete find matching doc and deletes it
 //next(error) hands any error to express' error handling (have not built yet)
-app.delete('/api/persons/:id', (req, res, next) => {
-  Person.findByIdAndDelete(req.params.id)
+app.delete('/api/persons/:id', requireLoginApi, (req, res, next) => {
+  Person.findOneAndDelete({ _id: req.params.id, owner: req.session.userId })
     .then(() => {
       res.status(204).end()
     })
@@ -324,8 +340,8 @@ app.delete('/api/persons/:id', (req, res, next) => {
 // its a POST because HTML forms can only send GET or POST
 // recieves the delete button's form
 //removes the person and redirects back to the page(could be any page i route)
-app.post('/delete/:id', (req, res, next) => {
-  Person.findByIdAndDelete(req.params.id)
+app.post('/delete/:id', requireLogin, (req, res, next) => {
+  Person.findOneAndDelete({ _id: req.params.id, owner: req.session.userId })
     .then(() => {
       res.redirect('/')
     })
