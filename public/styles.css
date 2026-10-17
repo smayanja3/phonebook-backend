@@ -1,8 +1,12 @@
-.error{
+.error {
     color: rgb(186, 28, 59);
 }
 
-body{
+form.inline {
+    display: inline;
+}
+
+body {
     max-width: 600px;
     margin: 2rem auto;
     padding: 0 1rem;

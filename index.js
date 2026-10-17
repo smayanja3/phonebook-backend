@@ -157,6 +157,16 @@ app.delete('/api/persons/:id', (req, res, next) => {
         .catch(error => next(error))
 })
 
+// recieves the delete button's form
+//removes the person and redirects back to the page(could be any page i route)
+app.delete('/delete/:id', (req, res, next) => {
+    Person.findByIdAndDelete(req.params.id)
+        .then(() => {
+            res.redirect('/')
+        })
+        .catch(error => next(error))
+})
+
 
 
 /////////// OLD (Part 3a): in-memory version /////////////

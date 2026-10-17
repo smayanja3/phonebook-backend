@@ -16,8 +16,8 @@
       <%= error %>
     </p>
     <% } %>
-<!-- vv where the form is going vv -->
- <!-- vv the name and number attributes are how the data reaches the re.body vv -->
+      <!-- vv where the form is going vv -->
+      <!-- vv the name and number attributes are how the data reaches the re.body vv -->
       <form action="/add" method="POST">
         <div>
           Name: <input type="text" name="name">
@@ -28,12 +28,15 @@
         <button type="submit">Add</button>
       </form>
 
-
       <ul>
         <% persons.forEach(person=> { %>
           <li>
             <%= person.name %>
               <%= person.number %>
+                <form action="/delete/<%= person.id %>" method="POST" class="inline"
+                  onsubmit="return confirm('Delete <%= person.name %>?')">
+                  <button type="submit">Delete</button>
+                </form>
           </li>
           <% }) %>
       </ul>
