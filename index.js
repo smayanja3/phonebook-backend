@@ -17,11 +17,25 @@ app.use(cors())
 //when data is sent the server recieves raw text express.json() converts it into JS object and puts it on req.body
 app.use(express.json()) //<- must come before routes so it sits at the top of the page
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+//renders .ejs files
+app.set('view engine', 'ejs')
+//serves CSS and browser JS 
+app.use(express.static('public'))
 
 
 /////////// NEW (Part 3c): MongoDB version /////////////
 
 //------------------- GET---------------------//
+// renders index.ejs and passes it the people from db
+app.get('/', (req, res, next) => {
+    Person.find({})
+        .then(persons => {
+            res.render('index', { persons })
+        })
+        .catch(error => next(error))
+})
+
+
 // fetch catches every person from the db/ find({}) = no conditions, give me everything
 app.get('/api/persons', (req, res) => {
     Person.find({}).then(persons => {
@@ -226,3 +240,11 @@ app.use(errorHandler)
 app.listen(PORT, () => {
     console.log(`Serving is buring oil ${PORT}`)
 })
+
+
+/* 
+<!-- <% %>runs JS and prints nothing (loops, if statements) -->
+<!-- <%=  %>	prints a value into the page, escaped so it’s safe from injected HTML -->
+ <!-- the forEach repeats the <li> once for ever person and the <%= inserts the name -->
+
+*/
