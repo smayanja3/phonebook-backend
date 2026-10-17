@@ -10,15 +10,33 @@
 
 <body>
   <h1>Phonebook</h1>
+  <!-- only shows a message when there is one -->
+  <% if (error) { %>
+    <p class="error">
+      <%= error %>
+    </p>
+    <% } %>
+<!-- vv where the form is going vv -->
+ <!-- vv the name and number attributes are how the data reaches the re.body vv -->
+      <form action="/add" method="POST">
+        <div>
+          Name: <input type="text" name="name">
+        </div>
+        <div>
+          Number: <input type="text" name="number">
+        </div>
+        <button type="submit">Add</button>
+      </form>
 
-  <ul>
-    <% persons.forEach(person=> { %>
-      <li>
-        <%= person.name %>
-          <%= person.number %>
-      </li>
-      <% }) %>
-  </ul>
+
+      <ul>
+        <% persons.forEach(person=> { %>
+          <li>
+            <%= person.name %>
+              <%= person.number %>
+          </li>
+          <% }) %>
+      </ul>
 </body>
 
 </html>

@@ -16,6 +16,8 @@ morgan.token('body', (request) => {
 app.use(cors())
 //when data is sent the server recieves raw text express.json() converts it into JS object and puts it on req.body
 app.use(express.json()) //<- must come before routes so it sits at the top of the page
+//browser form donot send JSON =so we need urlencoded
+app.use(express.urlencoded({ extended: true }))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 //renders .ejs files
 app.set('view engine', 'ejs')
@@ -30,7 +32,7 @@ app.use(express.static('public'))
 app.get('/', (req, res, next) => {
     Person.find({})
         .then(persons => {
-            res.render('index', { persons })
+            res.render('index', { persons, error: null })
         })
         .catch(error => next(error))
 })
@@ -91,6 +93,26 @@ app.post('/api/persons', (req, res) => {
     })
 })
 
+
+app.post('/add', (req, res, next) => {
+    const { name, number } = req.body
+
+    if (!name || !number) {
+        return Person.find({})
+            .then(persons => {
+                res.status(400).render('index', { persons, error: 'name or number missing' })
+            })
+            .catch(error => next(error))
+    }
+
+    const person = new Person({ name, number })
+
+    person.save()
+        .then(() => {
+            res.redirect('/') // after a successful save -> go back to ('/')
+        })
+        .catch(error => (error))
+})
 
 
 //------------------- PUT ---------------------//
