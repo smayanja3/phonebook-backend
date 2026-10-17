@@ -1,0 +1,8 @@
+### Real id (copy one from get all): expect 200
+GET http://localhost:3001/api/persons/6ad2e5b7cf702a8c666d3ba7
+
+### Valid-looking id that doesn't exist: expect 404
+GET http://localhost:3001/api/persons/6ad2e5b7cf702a8c666d6ba1
+
+### Malformed id: expect 400 {"error":"malformatted id"}
+GET http://localhost:3001/api/persons/abc

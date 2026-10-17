@@ -14,3 +14,15 @@ content-type: application/json
   "name": "Live Person",
   "number": "555-0000"
 }
+
+### Update (paste a real id from the live GET all)
+PUT {{baseUrl}}/api/persons/PASTE-A-REAL-24-CHAR-ID
+content-type: application/json
+
+{
+  "name": "Live Person",
+  "number": "555-1111"
+}
+
+### Delete (paste a real id from the live GET all)
+DELETE {{baseUrl}}/api/persons/PASTE-A-REAL-24-CHAR-ID

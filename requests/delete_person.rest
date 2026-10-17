@@ -1,1 +1,5 @@
-DELETE http://localhost:3001/api/persons/ID-NUMBER-HERE
+### Real id: expect 204 (that person is gone afterward)
+DELETE http://localhost:3001/api/persons/PASTE-A-REAL-24-CHAR-ID
+
+### Malformed id: expect 400
+DELETE http://localhost:3001/api/persons/abc
