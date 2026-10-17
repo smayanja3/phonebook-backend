@@ -10,4 +10,13 @@ content-type: application/json
 }
 
 ###
+POST https://phonebook-backend-5u5x.onrender.com/api/persons
+content-type: application/json
+
+{
+  "name": "Grace Hopper",
+  "number": "555-0066"
+}
+
+###
 DELETE https://phonebook-backend-5u5x.onrender.com/api/persons/1

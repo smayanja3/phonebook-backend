@@ -21,6 +21,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 
 /////////// NEW (Part 3c): MongoDB version /////////////
 
+//------------------- GET---------------------//
 // fetch catches every person from the db/ find({}) = no conditions, give me everything
 app.get('/api/persons', (req, res) => {
     Person.find({}).then(persons => {
@@ -28,13 +29,42 @@ app.get('/api/persons', (req, res) => {
     })
 })
 
+// finds one person by id/ findById returns null if = no id
+// a malformed if throws CastError
+app.get('/api/persons/:id', (req, res, next) => {
+    Person.findById(req.params.id)
+        .then(person => {
+            if (person) {
+                res.json(person)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(error => next(error))
+})
+
+//counts the people in the db instead of the old array
+//countDocuments({}) = how many match 'no conditions"
+app.get('/info', (req, res, next) => {
+    Person.countDocuments({})
+        .then(count => {
+            res.send(`
+                <p>Phonebook has info for ${count} people</p>
+                <p>${new Date()}</p>
+                `)
+        })
+        .catch(error => next(error))
+})
+
+
+//------------------- POST ---------------------//
 //saves a new person to the db MongoDB creates id itself
 // .then only goes out after the saved succeeded 
 app.post('/api/persons', (req, res) => {
-    const body = req.body 
+    const body = req.body
 
-    if(!body.name || !body.number){
-        return res.status(400).json({error: 'name or number missing'})
+    if (!body.name || !body.number) {
+        return res.status(400).json({ error: 'name or number missing' })
     }
 
     const person = new Person({
@@ -47,10 +77,43 @@ app.post('/api/persons', (req, res) => {
     })
 })
 
+
+
+//------------------- PUT ---------------------//
+//find the person by id
+// change their fields
+//save and send back the result
+app.put('/api/persons/:id', (req, res, next) => {
+    //pulls the two fields out of the req.body in one line. It’s the same as writing req.body.name and req.body.number
+    const { name, number } = req.body
+
+    //vv loads the existing person from the db
+    Person.findById(req.params.id)
+        .then(person => {
+            // no person w this id respond 404 and STOP
+            if (!person) {
+                return res.status(404).end()
+            }
+            //changing the loaded document in memory
+            person.name = name
+            person.number = number
+
+            //a promise inside a promise. It’s slightly awkward
+            //but it keeps the save from running when the person wasn’t found
+            return person.save().then(updatedPerson => {
+                res.json(updatedPerson)
+            })
+        })
+
+        .catch(error => next(error))
+})
+
+
+//------------------- DELETE ---------------------//
 //removes a person from the db by id
 //findByIdAndDelete find matching doc and deletes it
 //next(error) hands any error to express' error handling (have not built yet)
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
     Person.findByIdAndDelete(req.params.id)
         .then(result => {
             res.status(204).end()
@@ -59,7 +122,9 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 
+
 /////////// OLD (Part 3a): in-memory version /////////////
+
 // array is comment out because the db will replace it 
 // use let instead of const so we can add or delete persons 
 // let persons = [
@@ -145,6 +210,18 @@ app.delete('/api/persons/:id', (req, res) => {
 // // 204 No Content = 'it worked nothing to send back'
 
 // })
+
+const errorHandler = (error, req, res, next) => {
+    console.log(error.message)
+
+    if (error.name === 'CastError') {
+        return res.status(400).send({ error: 'malformatted id' }
+        )
+    }
+    next(error)
+}
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
     console.log(`Serving is buring oil ${PORT}`)

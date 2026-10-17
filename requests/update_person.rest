@@ -1,0 +1,20 @@
+### 1. Update Grace's number (should work)
+PUT http://localhost:3001/api/persons/6ad2e1cca3672b0a1f983f17
+content-type: application/json
+
+{
+  "name": "Grace Hopper",
+  "number": "999-9999"
+}
+
+### 2. Update Test Person's number (should work)
+PUT http://localhost:3001/api/persons/6ad2e5b7cf702a8c666d3ba7
+content-type: application/json
+
+{
+  "name": "Test Person",
+  "number": "777-7777"
+}
+
+### 3. Check the list afterwards
+GET http://localhost:3001/api/persons
