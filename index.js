@@ -7,9 +7,18 @@ const Person = require('./models/person')
 const cors = require('cors')
 const app = express()
 const PORT = process.env.PORT || 3001 // use the port the host gives me if non use 3001
+const session = require('express-session')
+const { MongoStore } = require('connect-mongo')
+const bcrypt = require('bcrypt')
+const User = require('./models/user')
+
 
 //The function receives the request, and whatever it returns is what morgan prints for :body.
 morgan.token('body', (request) => {
+  //never logs credentials PRIVACYYYYYYY
+  if (request.path === '/login' || request.path === '/register') {
+    return '[hidden]'
+  }
   return 'BODY>> ' + JSON.stringify(request.body)
 })
 
@@ -18,11 +27,124 @@ app.use(cors())
 app.use(express.json()) //<- must come before routes so it sits at the top of the page
 //browser form donot send JSON =so we need urlencoded
 app.use(express.urlencoded({ extended: true }))
+//vv render sits behind a proxy, so trust it for secure cookies
+app.set('trust proxy', 1)
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false, // only daves a session when something is stored in it... so visitor who do not long in can not create db entries == saveUninitialized
+  saveUninitialized: false,
+  // session. lives in Atlas db in collection called sessions
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  cookie: {
+    httpOnly: true, // broswer JS can not read the cookies
+    sameSite: 'lax', // not sent on cross-site POSTs
+    secure: process.env.NODE_ENV === 'production', // HTTP only lives here
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Days
+  }
+}))
+
+//makes currentUser available in every EJS page
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session.username || null
+  next()
+})
+
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 //renders .ejs files
 app.set('view engine', 'ejs')
 //serves CSS and browser JS
 app.use(express.static('public'))
+
+//------------------- AUTH ---------------------//
+///// REGISTER /////
+
+app.get('/register', (req, res) => {
+  res.render('register', { error: null })
+})
+
+app.post('/register', (req, res, next) => {
+  const { username, password } = req.body
+
+  // checking to make sure the info passed is a string and not like ${b}x4 etc.
+  if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
+    return res.status(400).render('register', { error: 'Username and password are required' })
+  }
+  if (password.length < 8) {
+    return res.status(400).render('register', { error: 'Password must be at least 8 characters ' })
+  }
+
+  // the password hash = 10 and ONLY the hash is stored
+  bcrypt.hash(password, 10)
+    .then(passwordHash => new User({ username, passwordHash }).save())
+    .then(() => {
+      res.redirect('/login')
+    })
+    .catch(error => {
+      if (error.code === 11000) {
+        return res.status(400).render('register', { error: 'That username is taken' })
+      }
+      if (error.name === 'ValidationError') {
+        return res.status(400).render('register', { error: 'Username must be at least 8 characters.' })
+      }
+      next(error)
+    })
+})
+
+///// LOGIN & LOGOUT /////
+
+app.get('/login', (req, res) => {
+  res.render('login', { error: null })
+})
+
+app.post('/login', (req, res, next) => {
+  const { username, password } = req.body
+  // broad failure, so attackers can't tell which part was wrong
+  const fail = () => res.status(401).render('login', { error: 'Invalid username or password.' })
+
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    return fail()
+  }
+
+  User.findOne({ username })
+    .then(user => {
+      if (!user) {
+        return fail()
+      }
+
+      return bcrypt.compare(password, user.passwordHash).then(matches => {
+        if (!matches) {
+          return fail()
+        }
+
+        // a fresh session id on login blocks
+        req.session.regenerate(regenError => {
+          if (regenError) {
+            return next(regenError)
+          }
+          req.session.userId = user.id
+          req.session.username = user.username
+          req.session.save(saveError => {
+            if (saveError) {
+              return next(saveError)
+            }
+            res.redirect('/')
+          })
+        })
+      })
+    })
+    .catch(error => next(error))
+})
+
+// logot is a POST so a random link or img cant log you out
+app.post('/logout', (req, res, next) => {
+  req.session.destroy(error => {
+    if(error){
+      return next(error)
+    }
+    res.clearCookie('connect.sid')
+    res.redirect('/')
+  })
+})
 
 
 /////////// NEW (Part 3c): MongoDB version /////////////

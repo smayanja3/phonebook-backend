@@ -10,43 +10,54 @@
 
 <body>
   <h1>Phonebook</h1>
-  <!-- only shows a message when there is one -->
-  <% if (error) { %>
-    <p class="error">
-      <%= error %>
-    </p>
-    <% } %>
-      <!-- vv where the form is going vv -->
-      <!-- vv the name and number attributes are how the data reaches the re.body vv -->
-      <form action="/add" method="POST">
-        <div>
-          Name: <input type="text" name="name">
-        </div>
-        <div>
-          Number: <input type="text" name="number">
-        </div>
-        <button type="submit">Add</button>
-      </form>
+  <!-- logout -->
+  <% if (currentUser) { %>
+    <div>
+      Logged in as <%= currentUser %>
+        <form action="/logout" method="POST" class="inline">
+          <button type="submit">Log out</button>
+        </form>
+    </div>
+    <% } else { %>
+      <div><a href="/login">Log in</a> or <a href="/register">register</a></div>
+      <% } %>
+        <!-- only shows a message when there is one -->
+        <% if (error) { %>
+          <p class="error">
+            <%= error %>
+          </p>
+          <% } %>
+            <!-- vv where the form is going vv -->
+            <!-- vv the name and number attributes are how the data reaches the re.body vv -->
+            <form action="/add" method="POST">
+              <div>
+                Name: <input type="text" name="name">
+              </div>
+              <div>
+                Number: <input type="text" name="number">
+              </div>
+              <button type="submit">Add</button>
+            </form>
 
-      <!-- the form and the button are inside the li so they get their own button -->
-      <ul>
-        <% persons.forEach(person=> { %>
-          <li>
-            <%= person.name %>
-              <%= person.number %>
+            <!-- the form and the button are inside the li so they get their own button -->
+            <ul>
+              <% persons.forEach(person=> { %>
+                <li>
+                  <%= person.name %>
+                    <%= person.number %>
 
-                <form action="/update/<% person.id %>" method="POST" class="inline">
-                  <input type="text" name="number" placeholder="new number" required>
-                  <button type="submit">Update</button>
-                </form>
+                      <form action="/update/<% person.id %>" method="POST" class="inline">
+                        <input type="text" name="number" placeholder="new number" required>
+                        <button type="submit">Update</button>
+                      </form>
 
-                <form action="/delete/<%= person.id %>" method="POST" class="inline"
-                  onsubmit="return confirm('Delete <%= person.name %>?')">
-                  <button type="submit">Delete</button>
-                </form>
-          </li>
-          <% }) %>
-      </ul>
+                      <form action="/delete/<%= person.id %>" method="POST" class="inline"
+                        onsubmit="return confirm('Delete <%= person.name %>?')">
+                        <button type="submit">Delete</button>
+                      </form>
+                </li>
+                <% }) %>
+            </ul>
 </body>
 
 </html>
