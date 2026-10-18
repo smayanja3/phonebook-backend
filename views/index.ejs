@@ -31,7 +31,7 @@
 
             <!-- vv where the form is going vv -->
             <!-- vv the name and number attributes are how the data reaches the re.body vv -->
-            <% if (currentUser) { %>}
+            <% if (currentUser) { %>
               <form action="/add" method="POST">
                 <div>
                   Name: <input type="text" name="name">
@@ -41,8 +41,8 @@
                 </div>
                 <button type="submit">Add</button>
               </form>
-              <% else { %>
-                <p> Log in to add people</p>
+              <% } else { %>
+                <p>Log in to add people.</p>
                 <% } %>
 
                   <!-- the form and the button are inside the li so they get their own button -->
