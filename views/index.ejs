@@ -53,7 +53,7 @@
                           <%= person.number %>
                             <!-- update and delete only appear on entries you own -->
                             <% if (currentUserId && person.owner && String(person.owner)===currentUserId) { %>
-                              <form action="/update/<% person.id %>" method="POST" class="inline">
+                              <form action="/update/<%= person.id %>" method="POST" class="inline">
                                 <input type="text" name="number" placeholder="new number" required>
                                 <button type="submit">Update</button>
                               </form>
